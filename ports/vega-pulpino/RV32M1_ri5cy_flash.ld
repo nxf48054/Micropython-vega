@@ -26,16 +26,16 @@
 /* Entry Point */
 OUTPUT_ARCH( "riscv" )
 
-HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x0400;
-STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0800;
+HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x10000;
+STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x2000;
 
 /* Specify the memory areas */
 MEMORY
 {
   m_vector              (RX)  : ORIGIN = 0x000FFF00, LENGTH = 0x00000100
   m_text                (RX)  : ORIGIN = 0x00000000, LENGTH = 0x000FFF00
-  m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00030000 - 0x1800
-  rpmsg_sh_mem          (RW)  : ORIGIN = 0x2002E800, LENGTH = 0x1800
+  m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00030000 - 0x1000
+  rpmsg_sh_mem          (RW)  : ORIGIN = 0x2002E800, LENGTH = 0x1000
   m_usb_sram            (RW)  : ORIGIN = 0x48010000, LENGTH = 0x00000800
 }
 
@@ -176,5 +176,8 @@ SECTIONS
 
   /* Initializes stack on the end of block */
   PROVIDE(__stack = __StackTop);
+  _estack = ORIGIN(m_data) + LENGTH(m_data);
+  _heap_start = __heap_start;
+  _heap_end = _heap_start + HEAP_SIZE;
 }
 

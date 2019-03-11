@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "py/stackctrl.h"
 #include "py/compile.h"
 #include "py/runtime.h"
 #include "py/repl.h"
@@ -12,12 +13,12 @@
 #include "fsl_device_registers.h"
 #include "fsl_debug_console.h"
 #include "board.h"
-
+#include "gccollect.h"
 #include "pin_mux.h"
 #include "clock_config.h"
 
 // Receive single character
-char mp_hal_stdin_rx_chr(void) {
+int mp_hal_stdin_rx_chr(void) {
     int32_t c = 0;
     while (c<=0) {
         c = GETCHAR();
@@ -48,8 +49,7 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
 }
 
 static char *stack_top;
-static char heap[180*1024];
-
+static char heap[100*1024];
 int main(int argc, char **argv) {
     int stack_dummy;
     // Initialization block taken from led_fade.c
@@ -59,9 +59,12 @@ int main(int argc, char **argv) {
         BOARD_InitDebugConsole();
     }
     
-    stack_top = (char*)&stack_dummy;
-
-    gc_init(heap, heap + sizeof(heap));
+    //note: the value from *.ld is the value store in the address of the ram, such as _estack is the value store in the real address in ram, so should use & to get the real address
+    stack_top = (char*)&stack_dummy;//(char*)&_estack;
+    mp_stack_set_top((void*) stack_top);
+    mp_stack_set_limit(2048);
+    gc_init(heap, heap + sizeof(heap)); 
+    //gc_init(&_heap_start, &_heap_end);
     mp_init();
     pyexec_friendly_repl();
     mp_deinit();
@@ -70,9 +73,9 @@ int main(int argc, char **argv) {
 
 void gc_collect(void) {
 	printf("gc_collect\n");
-    void *dummy;
+    void *dummy ;//= (void*)(&_estack - &_heap_end - 1024);
     gc_collect_start();
-    gc_collect_root(&dummy, ((mp_uint_t)stack_top - (mp_uint_t)&dummy) / sizeof(mp_uint_t));
+    gc_collect_root(&dummy, ((mp_uint_t)&stack_top - (mp_uint_t)&dummy) / sizeof(mp_uint_t));
     gc_collect_end();
     gc_dump_info();
 }
