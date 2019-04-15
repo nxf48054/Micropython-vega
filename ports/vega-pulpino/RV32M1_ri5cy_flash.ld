@@ -26,8 +26,9 @@
 /* Entry Point */
 OUTPUT_ARCH( "riscv" )
 
-HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x10000;
-STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x2000;
+HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x1000;
+STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x1000;
+MP_HEAP_SIZE = DEFINED(__mp_heap_size__) ? __mp_heap_size__ : 0x13000;
 
 /* Specify the memory areas */
 MEMORY
@@ -155,6 +156,15 @@ SECTIONS
     _heap_end = __heap_end;
   } > m_data
 
+  .heap_mp :
+  {
+	. = ALIGN(8);
+	__mp_heap = .;
+	. += MP_HEAP_SIZE;
+	__mp_eheap = .;
+	_mp_eheap = __mp_eheap;
+  } > m_data
+
   .stack :
   {
     . = ALIGN(8);
@@ -176,8 +186,9 @@ SECTIONS
 
   /* Initializes stack on the end of block */
   PROVIDE(__stack = __StackTop);
+  _stack_size = STACK_SIZE;
   _estack = ORIGIN(m_data) + LENGTH(m_data);
-  _heap_start = __heap_start;
-  _heap_end = _heap_start + HEAP_SIZE;
+  _heap_start = __mp_heap;
+  _heap_end = _heap_start + MP_HEAP_SIZE;
 }
 

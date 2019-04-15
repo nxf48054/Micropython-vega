@@ -50,6 +50,7 @@ BOARD_InitPins:
  *
  *END**************************************************************************/
 void BOARD_InitPins(void) {
+  CLOCK_EnableClock(kCLOCK_PortA);
   CLOCK_EnableClock(kCLOCK_PortC);                           /* Clock Gate Control: 0x01u */
 
   PORT_SetPinMux(PORTC, PIN7_IDX, kPORT_MuxAlt3);            /* PORTC7 (pin N2) is configured as LPUART0_RX */
@@ -78,8 +79,7 @@ BOARD_I2C_ConfigurePins:
  *
  *END**************************************************************************/
 void BOARD_I2C_ConfigurePins(void) {
-  CLOCK_EnableClock(kCLOCK_PortE);                           /* Clock Gate Control: 0x01u */
-
+  CLOCK_EnableClock(kCLOCK_PortE);                           /* Clock Gate Control: 0x01u */ 
   const port_pin_config_t porte29_pinG15_config = {
     kPORT_PullUp,                                            /* Internal pull-up resistor is enabled */
     kPORT_FastSlewRate,                                      /* Fast slew rate is configured */

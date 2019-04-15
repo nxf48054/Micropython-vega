@@ -37,6 +37,7 @@
 #include "lib/utils/pyexec.h"
 #include "extmod/utime_mphal.h"
 #include "i2c.h"
+#include "led.h"
 #include "test.h"
 
 
@@ -58,6 +59,9 @@ STATIC const mp_rom_map_elem_t pyb_module_globals_table[] = {
 #endif
 #if MICRO_HW_HAS_I2C
     { MP_ROM_QSTR(MP_QSTR_I2C), MP_ROM_PTR(&pyb_i2c_type) },
+#endif
+#if MICRO_HW_HAS_LED
+    { MP_ROM_QSTR(MP_QSTR_LED), MP_ROM_PTR(&pyb_led_type) },
 #endif
     { MP_ROM_QSTR(MP_QSTR_pyboard), MP_ROM_PTR(&pyb_pyboard_type) },
 }; 

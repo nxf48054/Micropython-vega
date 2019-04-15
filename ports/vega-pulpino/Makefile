@@ -33,8 +33,13 @@ SRC_C = \
 	pin_mux.c \
 	clock_config.c \
 	test.c \
+	irq.c \
 	i2c.c \
+	led.c \
+	py_time.c \
 	modpyb.c \
+	systick.c \
+	modmcu.c \
 	mphalport.c \
 	bufhelper.c \
 	$(VEGA_SDK)/devices/RV32M1/drivers/fsl_common.c \

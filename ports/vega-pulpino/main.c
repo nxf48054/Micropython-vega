@@ -17,6 +17,15 @@
 #include "pin_mux.h"
 #include "clock_config.h"
 
+#define INIT_LED_PIN_WITH_FUNC_PTR (0)
+
+void Systick_Init(void)
+{   
+    CLOCK_SetIpSrc(kCLOCK_Lpit0, kCLOCK_IpSrcFircAsync);//stupid error: miss this line, the lpit0 without a src-clock
+	SystemSetupSystick(1000,7);
+	SystemClearSystickFlag();
+}
+
 // Receive single character
 int mp_hal_stdin_rx_chr(void) {
     int32_t c = 0;
@@ -48,8 +57,11 @@ void do_str(const char *src, mp_parse_input_kind_t input_kind) {
     }
 }
 
-static char *stack_top;
-static char heap[100*1024];
+extern uint32_t __stack;
+extern uint32_t _stack_size;
+extern uint32_t _estack;
+extern uint32_t _heap_start;
+extern uint32_t _heap_end;
 int main(int argc, char **argv) {
     int stack_dummy;
     // Initialization block taken from led_fade.c
@@ -57,14 +69,16 @@ int main(int argc, char **argv) {
         BOARD_InitPins();
         BOARD_BootClockRUN();
         BOARD_InitDebugConsole();
+		Systick_Init(); // init the systick timer
     }
     
     //note: the value from *.ld is the value store in the address of the ram, such as _estack is the value store in the real address in ram, so should use & to get the real address
-    stack_top = (char*)&stack_dummy;//(char*)&_estack;
-    mp_stack_set_top((void*) stack_top);
-    mp_stack_set_limit(2048);
-    gc_init(heap, heap + sizeof(heap)); 
-    //gc_init(&_heap_start, &_heap_end);
+#if INIT_LED_PIN_WITH_FUNC_PTR
+	led_init0();
+#endif
+    mp_stack_set_top(&_estack);
+    mp_stack_set_limit(&_stack_size);
+    gc_init(&_heap_start, &_heap_end);
     mp_init();
     pyexec_friendly_repl();
     mp_deinit();
@@ -72,12 +86,16 @@ int main(int argc, char **argv) {
 }
 
 void gc_collect(void) {
-	printf("gc_collect\n");
-    void *dummy ;//= (void*)(&_estack - &_heap_end - 1024);
+#if ENABLE_GC_OUTPUT
+    printf("gc_collect\n");
+#endif
     gc_collect_start();
-    gc_collect_root(&dummy, ((mp_uint_t)&stack_top - (mp_uint_t)&dummy) / sizeof(mp_uint_t));
+    gc_collect_root((void**)&__stack, ((uint32_t)&_estack - (uint32_t)&__stack) / sizeof(uint32_t) );
     gc_collect_end();
+#if ENABLE_GC_OUTPUT
     gc_dump_info();
+#endif
+
 }
 
 mp_lexer_t *mp_lexer_new_from_file(const char *filename) {
