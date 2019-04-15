@@ -77,6 +77,7 @@ SECTIONS
     *(.fini)
   } > m_text
 
+  
   .preinit_array :
   {
     PROVIDE_HIDDEN (__preinit_array_start = .);
@@ -103,6 +104,7 @@ SECTIONS
   __etext = .;    /* define a global symbol at end of code */
   __global_pointer = .;    /* define a global symbol at end of code */
   __DATA_ROM = .; /* Symbol is used by startup for data initialization */
+  _sidata = __DATA_ROM;
 
   .data : AT(__DATA_ROM)
   {
@@ -121,6 +123,7 @@ SECTIONS
     __data_end__ = .;        /* define a global symbol at data end */
   } > m_data
 
+  _sdata = __data_start__;
   __DATA_END = __DATA_ROM + (__data_end__ - __data_start__);
   text_end = ORIGIN(m_text) + LENGTH(m_text);
   ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
@@ -142,7 +145,9 @@ SECTIONS
     __bss_end__ = .;
     __END_BSS = .;
   } > m_data
-
+  
+  _sbss = __bss_start__;
+  _ebss = __bss_end__;
   /* End of uninitalized data segement */
   _end = .;
   PROVIDE(end = .);
@@ -186,6 +191,7 @@ SECTIONS
 
   /* Initializes stack on the end of block */
   PROVIDE(__stack = __StackTop);
+  _etext = __etext;
   _stack_size = STACK_SIZE;
   _estack = ORIGIN(m_data) + LENGTH(m_data);
   _heap_start = __mp_heap;

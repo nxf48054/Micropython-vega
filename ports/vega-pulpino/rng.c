@@ -1,9 +1,9 @@
 /*
- * This file is part of the Micro Python project, http://micropython.org/
+ * This file is part of the MicroPython project, http://micropython.org/
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2013, 2014 Damien P. George
+ * Copyright (c) 2013-2018 Damien P. George
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,20 +23,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include "rng.h"
+#include "board.h"
+#include "fsl_trng.h"
+#include "py/nlr.h"
+#include "py/runtime.h"
+#include "py/mphal.h"
+#include <stdlib.h>
+#if MICROPY_HW_ENABLE_RNG
+uint32_t s_seed;
+uint32_t rng_get(void) {
+    uint32_t i;
+    trng_config_t trngConfig;
+    status_t status;
+    uint32_t data;
+	TRNG_GetDefaultConfig(&trngConfig);
+	/* Set sample mode of the TRNG ring oscillator to Von Neumann, for better random data.
+	 * It is optional.*/
+	trngConfig.sampleMode = kTRNG_SampleModeVonNeumann;
+	/* Initialize TRNG */
+	status = TRNG_Init(TRNG, &trngConfig);
+	status = TRNG_GetRandomData(TRNG, &data, 1);
+	if (status == kStatus_Success)
+	{
+		s_seed = data;
+		srand(s_seed);
+	}
+	return rand();
+}
 
-// variables defining memory layout
-// (these probably belong somewhere else...)
-/*
-extern uint32_t _ram_start;
-extern uint32_t _ram_end;
-*/
-extern uint32_t _sidata;
-extern uint32_t _sdata;
-extern uint32_t _etext;
-extern uint32_t _edata;
-extern uint32_t _sbss;
-extern uint32_t _ebss;
-extern uint32_t _heap_start;
-extern uint32_t _heap_end;
-extern uint32_t _estack;
+// Return a 30-bit hardware generated random number.
+STATIC mp_obj_t pyb_rng_getnum(void) {
+	return mp_obj_new_int(rng_get() >> 2);
+}
 
+MP_DEFINE_CONST_FUN_OBJ_0(pyb_rng_getnum_obj, pyb_rng_getnum);
+
+
+#endif // MICROPY_HW_ENABLE_RNG

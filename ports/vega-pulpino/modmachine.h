@@ -1,9 +1,9 @@
 /*
- * This file is part of the Micro Python project, http://micropython.org/
+ * This file is part of the MicroPython project, http://micropython.org/
  *
  * The MIT License (MIT)
  *
- * Copyright (c) 2013, 2014 Damien P. George
+ * Copyright (c) 2013-2015 Damien P. George
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,20 +23,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifndef MICROPY_INCLUDED_MODMACHINE_H
+#define MICROPY_INCLUDED_MODMACHINE_H
 
-// variables defining memory layout
-// (these probably belong somewhere else...)
-/*
-extern uint32_t _ram_start;
-extern uint32_t _ram_end;
-*/
-extern uint32_t _sidata;
-extern uint32_t _sdata;
-extern uint32_t _etext;
-extern uint32_t _edata;
-extern uint32_t _sbss;
-extern uint32_t _ebss;
-extern uint32_t _heap_start;
-extern uint32_t _heap_end;
-extern uint32_t _estack;
+#include "py/obj.h"
+#define MP_HAL_UNIQUE_ID_ADDRESS (0x40026000)
 
+void machine_init(void);
+void machine_deinit(void);
+
+
+MP_DECLARE_CONST_FUN_OBJ_VAR_BETWEEN(machine_info_obj);
+MP_DECLARE_CONST_FUN_OBJ_0(machine_unique_id_obj);
+MP_DECLARE_CONST_FUN_OBJ_0(machine_reset_obj);
+//MP_DECLARE_CONST_FUN_OBJ_0(machine_bootloader_obj);
+MP_DECLARE_CONST_FUN_OBJ_VAR_BETWEEN(machine_freq_obj);
+//MP_DECLARE_CONST_FUN_OBJ_0(machine_sleep_obj);
+//MP_DECLARE_CONST_FUN_OBJ_0(machine_deepsleep_obj);
+
+#endif // MICROPY_INCLUDED_MODMACHINE_H

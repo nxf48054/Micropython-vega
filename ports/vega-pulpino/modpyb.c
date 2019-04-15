@@ -38,7 +38,10 @@
 #include "extmod/utime_mphal.h"
 #include "i2c.h"
 #include "led.h"
+#include "rng.h"
+#include "irq.h"
 #include "test.h"
+#include "modmachine.h"
 
 
 STATIC const mp_rom_map_elem_t pyb_module_globals_table[] = {
@@ -64,6 +67,15 @@ STATIC const mp_rom_map_elem_t pyb_module_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR_LED), MP_ROM_PTR(&pyb_led_type) },
 #endif
     { MP_ROM_QSTR(MP_QSTR_pyboard), MP_ROM_PTR(&pyb_pyboard_type) },
+#if MICROPY_HW_ENABLE_RNG
+	{ MP_ROM_QSTR(MP_QSTR_rng), MP_ROM_PTR(&pyb_rng_getnum_obj) },
+#endif
+	{ MP_ROM_QSTR(MP_QSTR_hard_reset),       MP_ROM_PTR(&machine_reset_obj) },
+	{ MP_ROM_QSTR(MP_QSTR_info),       MP_ROM_PTR(&machine_info_obj) },
+ 	{ MP_ROM_QSTR(MP_QSTR_unique_id),  MP_ROM_PTR(&machine_unique_id_obj) },
+ 	{ MP_ROM_QSTR(MP_QSTR_freq),       MP_ROM_PTR(&machine_freq_obj) },
+	{ MP_ROM_QSTR(MP_QSTR_disable_irq), MP_ROM_PTR(&pyb_disable_irq_obj) },
+	{ MP_ROM_QSTR(MP_QSTR_enable_irq), MP_ROM_PTR(&pyb_enable_irq_obj) },
 }; 
   
 STATIC MP_DEFINE_CONST_DICT(pyb_module_globals, pyb_module_globals_table);

@@ -36,10 +36,12 @@ SRC_C = \
 	irq.c \
 	i2c.c \
 	led.c \
+	rng.c \
 	py_time.c \
 	modpyb.c \
 	systick.c \
 	modmcu.c \
+	modmachine.c \
 	mphalport.c \
 	bufhelper.c \
 	$(VEGA_SDK)/devices/RV32M1/drivers/fsl_common.c \
@@ -55,6 +57,7 @@ SRC_C = \
 	$(VEGA_SDK)/devices/RV32M1/drivers/fsl_intmux.c \
 	$(VEGA_SDK)/devices/RV32M1/drivers/fsl_lpi2c.c \
 	$(VEGA_SDK)/devices/RV32M1/drivers/fsl_lpuart.c \
+	$(VEGA_SDK)/devices/RV32M1/drivers/fsl_trng.c \
 	lib/utils/stdout_helpers.c \
 	lib/utils/pyexec.c \
 	lib/mp-readline/readline.c

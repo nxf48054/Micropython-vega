@@ -1,9 +1,14 @@
+#pragma once
+#ifndef __INCLUDED_MPCONFIGPORT_H
+#define __INCLUDED_MPCONFIGPORT_H
 #include <stdint.h>
+#include "fsl_common.h"
 
 #define MP_SSIZE_MAX (0x7fffffff)
 
 #define MICRO_HW_HAS_I2C           (1)
 #define MICRO_HW_HAS_LED           (1)
+#define MICROPY_HW_ENABLE_RNG      (1)
 #define MICROPY_HW_HAS_FS_MOUNT    (0)   
 #define MICROPY_HW_HAS_SDCARD      (0)
 #define MICROPY_HW_HAS_ADC         (0)
@@ -73,19 +78,24 @@
 #define MICROPY_LONGINT_IMPL        (MICROPY_LONGINT_IMPL_MPZ)
 #define MICROPY_FLOAT_IMPL          (MICROPY_FLOAT_IMPL_DOUBLE)
 
+extern const struct _mp_obj_module_t machine_module;
 extern const struct _mp_obj_module_t pyb_module;
 extern const struct _mp_obj_module_t time_module;
 extern const struct _mp_obj_module_t mcu_module;
 
 #define MICROPY_PORT_BUILTIN_MODULES \
+	{ MP_ROM_QSTR(MP_QSTR_umachine), MP_ROM_PTR(&machine_module) },	\
+	{ MP_ROM_QSTR(MP_QSTR_machine), MP_ROM_PTR(&machine_module) },	\
     { MP_ROM_QSTR(MP_QSTR_pyb), MP_ROM_PTR(&pyb_module) }, \
 	{ MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&time_module) }, \
-	{ MP_ROM_QSTR(MP_QSTR_mcu), MP_ROM_PTR(&mcu_module) }
+	{ MP_ROM_QSTR(MP_QSTR_mcu), MP_ROM_PTR(&mcu_module) },
 
 #define MICROPY_PORT_CONSTANTS \
+	{ MP_ROM_QSTR(MP_QSTR_umachine), MP_ROM_PTR(&machine_module) },	\
+	{ MP_ROM_QSTR(MP_QSTR_machine), MP_ROM_PTR(&machine_module) },	\
     { MP_ROM_QSTR(MP_QSTR_pyb), MP_ROM_PTR(&pyb_module) }, \
 	{ MP_ROM_QSTR(MP_QSTR_time), MP_ROM_PTR(&time_module) }, \
-	{ MP_ROM_QSTR(MP_QSTR_mcu), MP_ROM_PTR(&mcu_module) }	
+	{ MP_ROM_QSTR(MP_QSTR_mcu), MP_ROM_PTR(&mcu_module) },
 
 // type definitions for the specific machine
 
@@ -118,3 +128,15 @@ typedef long mp_off_t;
 
 #define MICROPY_PORT_ROOT_POINTERS \
     const char *readline_hist[8];
+
+extern uint32_t g_mstatus;
+static inline void enable_irq(mp_uint_t state){
+	__ASM volatile ("csrw mstatus, %0" : : "r"(state));
+}
+
+static inline mp_uint_t disable_irq(void){
+    __ASM volatile ("csrrci %0, mstatus, 8" : "=r"(g_mstatus));
+
+    return g_mstatus;
+}
+#endif
