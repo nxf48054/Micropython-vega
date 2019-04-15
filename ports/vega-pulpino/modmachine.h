@@ -27,7 +27,7 @@
 #define MICROPY_INCLUDED_MODMACHINE_H
 
 #include "py/obj.h"
-#define MP_HAL_UNIQUE_ID_ADDRESS (0x40026000)
+#define MP_HAL_UNIQUE_ID_ADDRESS (0x40026058)
 
 void machine_init(void);
 void machine_deinit(void);
